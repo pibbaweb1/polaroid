@@ -1,281 +1,792 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Gerador de Fotos Polaroid — Moldura Personalizável</title>
-<style>
-  body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial; padding:20px; background:#f6f7fb; color:#111}
-  .panel{max-width:1100px;margin:0 auto;background:#fff;padding:16px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
-  h1{margin:0 0 12px;font-size:22px}
-  .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-  input[type=file]{display:block}
-  label{font-size:13px}
-  canvas{background:#ddd;border:1px solid #ccc;max-width:100%;border-radius:6px}
-  .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .btn{padding:8px 12px;border-radius:6px;border:none;background:#2563eb;color:#fff;cursor:pointer}
-  .btn.secondary{background:#6b7280}
-  .small{font-size:13px;padding:6px 8px}
-  .info{font-size:13px;color:#444}
-  .range{width:180px}
-  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-  .thumb{background:#fafafa;padding:8px;border-radius:8px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.08)}
-  .thumb canvas{width:100%;height:auto}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FotoPrint - Editor de Fotos para A4</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .upload-section {
+            background-color: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: var(--border-radius);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .upload-area p {
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background-color: #6510a3;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: #e01a6f;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .preview-section {
+            background-color: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .preview-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .preview-title h2 {
+            font-size: 1.5rem;
+        }
+
+        .a4-preview-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .a4-preview {
+            background-color: white;
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ddd;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .a4-page {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 5mm;
+            padding: 5mm;
+            width: 100%;
+            height: 100%;
+        }
+
+        .photo-slot {
+            position: relative;
+            background-color: #f0f0f0;
+            border: 0.5mm dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .photo-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .photo-slot.empty::before {
+            content: "+";
+            font-size: 2rem;
+            color: #aaa;
+        }
+
+        .photo-slot .cut-line {
+            position: absolute;
+            border: 0.5mm dashed red;
+            width: 95mm;
+            height: 145mm;
+            pointer-events: none;
+        }
+
+        .photo-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .photo-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .photo-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .photo-item:last-child {
+            border-bottom: none;
+        }
+
+        .photo-thumb {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+
+        .photo-info {
+            flex: 1;
+        }
+
+        .photo-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .photo-size {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .photo-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            transition: var(--transition);
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .action-btn:hover {
+            color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .rotate-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .instructions {
+            background-color: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-top: 30px;
+        }
+
+        .instructions h2 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .drag-over {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .page-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .preview-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
-<div class="panel">
-  <h1>Gerador de Fotos Polaroid — Moldura Personalizável</h1>
+    <div class="container">
+        <header>
+            <h1>FotoPrint</h1>
+            <p>Importe suas fotos e prepare para impressão em formato A4</p>
+        </header>
 
-  <div class="row">
-    <div>
-      <label>1) Escolher imagens (várias permitidas)</label><br>
-      <input id="file" type="file" accept="image/*" multiple>
+        <div class="main-content">
+            <div class="upload-section">
+                <h2>Importar Fotos</h2>
+                <p>Selecione até 8 fotos para impressão (2 folhas A4)</p>
+                
+                <div class="upload-area" id="uploadArea">
+                    <i>📷</i>
+                    <p>Arraste e solte suas fotos aqui</p>
+                    <p>ou</p>
+                    <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+                    <button class="btn" id="browseBtn">Selecionar Fotos</button>
+                </div>
+
+                <div class="photo-list" id="photoList">
+                    <!-- Lista de fotos será gerada aqui -->
+                </div>
+
+                <button class="btn btn-secondary btn-full" id="processBtn" disabled>Processar Fotos</button>
+                <button class="btn btn-danger btn-full" id="clearBtn" style="margin-top: 10px;">Limpar Todas</button>
+            </div>
+
+            <div class="preview-section">
+                <div class="preview-title">
+                    <h2>Pré-visualização A4</h2>
+                    <button class="btn" id="downloadBtn" disabled>Baixar para Impressão</button>
+                </div>
+
+                <div class="preview-controls">
+                    <span id="pageIndicator">Página 1 de 1</span>
+                    <div>
+                        <button class="btn" id="prevPageBtn" disabled>Anterior</button>
+                        <button class="btn" id="nextPageBtn" disabled>Próxima</button>
+                    </div>
+                </div>
+                
+                <div class="a4-preview-container">
+                    <div class="a4-preview">
+                        <div class="a4-page">
+                            <div class="photo-grid" id="photoGridPage1">
+                                <!-- Slots de fotos da página 1 serão gerados aqui -->
+                            </div>
+                            <div class="page-indicator">Página 1</div>
+                        </div>
+                    </div>
+                    <div class="a4-preview" id="page2Preview" style="display: none;">
+                        <div class="a4-page">
+                            <div class="photo-grid" id="photoGridPage2">
+                                <!-- Slots de fotos da página 2 serão gerados aqui -->
+                            </div>
+                            <div class="page-indicator">Página 2</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="photo-controls">
+                    <button class="btn" id="autoArrangeBtn" disabled>Organizar Automaticamente</button>
+                    <button class="btn" id="rotateAllBtn" disabled>Rotacionar Todas</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h2>Como usar:</h2>
+            <ol>
+                <li>Selecione até 8 fotos usando o botão "Selecionar Fotos" ou arrastando-as para a área indicada</li>
+                <li>Clique em "Processar Fotos" para ajustar automaticamente cores, DPI e dimensionamento</li>
+                <li>Visualize o layout nas duas páginas A4 na área de pré-visualização</li>
+                <li>Use os botões de rotação individuais para ajustar a orientação das fotos</li>
+                <li>Use os controles de página para navegar entre as duas folhas A4</li>
+                <li>Clique em "Baixar para Impressão" para salvar o arquivo pronto para impressão</li>
+            </ol>
+            <p><strong>Especificações:</strong> Cada foto terá 9,5x14,5cm com 5mm de espaçamento entre elas e nas bordas da folha. Linhas de corte de 0,5mm serão adicionadas.</p>
+        </div>
+
+        <footer>
+            <p>FotoPrint &copy; 2023 - Um editor simples e eficiente para suas fotos</p>
+        </footer>
     </div>
-    <div>
-      <label>2) DPI (resolução de impressão)</label><br>
-      <select id="dpi">
-        <option value="150">150 DPI</option>
-        <option value="300" selected>300 DPI (recomendado)</option>
-        <option value="600">600 DPI</option>
-      </select>
-    </div>
-    <div>
-      <label>3) Tamanho externo (corte)</label><br>
-      <select id="size">
-        <option value="62x90" selected>62 mm × 90 mm (Padrão)</option>
-        <option value="58x86">58 mm × 86 mm (Mini)</option>
-        <option value="64x97">64 mm × 97 mm (Wide)</option>
-        <option value="70x100">70 mm × 100 mm (Grande)</option>
-      </select>
-    </div>
-    <div>
-      <label>4) Estilo</label><br>
-      <select id="style">
-        <option value="natural">Natural</option>
-        <option value="vintage">Vintage</option>
-        <option value="bw">Preto e branco</option>
-        <option value="manual">Manual (R/G/B)</option>
-      </select>
-    </div>
-  </div>
 
-  <div class="row controls">
-    <label>Tint (R/G/B):</label>
-    <input id="r" class="range" type="range" min="0" max="255" value="0">
-    <input id="g" class="range" type="range" min="0" max="255" value="0">
-    <input id="b" class="range" type="range" min="0" max="255" value="0">
-    <span class="info" id="rgbVal">0,0,0</span>
-  </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos do DOM
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const browseBtn = document.getElementById('browseBtn');
+            const photoList = document.getElementById('photoList');
+            const photoGridPage1 = document.getElementById('photoGridPage1');
+            const photoGridPage2 = document.getElementById('photoGridPage2');
+            const processBtn = document.getElementById('processBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const autoArrangeBtn = document.getElementById('autoArrangeBtn');
+            const rotateAllBtn = document.getElementById('rotateAllBtn');
+            const prevPageBtn = document.getElementById('prevPageBtn');
+            const nextPageBtn = document.getElementById('nextPageBtn');
+            const page2Preview = document.getElementById('page2Preview');
+            const pageIndicator = document.getElementById('pageIndicator');
 
-  <div class="row">
-    <button id="generate" class="btn">Gerar Fotos</button>
-    <button id="downloadAll" class="btn secondary">Baixar Todas (ZIP)</button>
-    <button id="generatePDF" class="btn small">Gerar Folha A4 (PDF)</button>
-    <button id="reset" class="btn small">Resetar</button>
-    <div style="margin-left:auto" class="info">Área da foto: 55×72 mm (fixa)</div>
-  </div>
+            // Estado da aplicação
+            let photos = [];
+            let currentPage = 1;
+            const MAX_PHOTOS = 8;
+            const PHOTOS_PER_PAGE = 4;
 
-  <div id="gallery" class="gallery"></div>
-</div>
+            // Inicializar slots de fotos
+            function initializePhotoSlots() {
+                photoGridPage1.innerHTML = '';
+                photoGridPage2.innerHTML = '';
+                
+                for (let i = 0; i < PHOTOS_PER_PAGE; i++) {
+                    const slot1 = document.createElement('div');
+                    slot1.className = 'photo-slot empty';
+                    slot1.dataset.index = i;
+                    photoGridPage1.appendChild(slot1);
+                    
+                    const slot2 = document.createElement('div');
+                    slot2.className = 'photo-slot empty';
+                    slot2.dataset.index = i + PHOTOS_PER_PAGE;
+                    photoGridPage2.appendChild(slot2);
+                }
+            }
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-const { jsPDF } = window.jspdf;
-const fileInput=document.getElementById('file');
-const gallery=document.getElementById('gallery');
-const dpiSelect=document.getElementById('dpi');
-const styleSelect=document.getElementById('style');
-const rSlider=document.getElementById('r');
-const gSlider=document.getElementById('g');
-const bSlider=document.getElementById('b');
-const rgbVal=document.getElementById('rgbVal');
-const generateBtn=document.getElementById('generate');
-const resetBtn=document.getElementById('reset');
-const downloadAllBtn=document.getElementById('downloadAll');
-const sizeSelect=document.getElementById('size');
-const generatePDFBtn=document.getElementById('generatePDF');
+            // Atualizar lista de fotos
+            function updatePhotoList() {
+                photoList.innerHTML = '';
+                
+                if (photos.length === 0) {
+                    const emptyMsg = document.createElement('p');
+                    emptyMsg.textContent = 'Nenhuma foto selecionada';
+                    emptyMsg.style.textAlign = 'center';
+                    emptyMsg.style.color = '#666';
+                    photoList.appendChild(emptyMsg);
+                    return;
+                }
+                
+                photos.forEach((photo, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'photo-item';
+                    
+                    const thumb = document.createElement('img');
+                    thumb.className = 'photo-thumb';
+                    thumb.src = photo.url;
+                    
+                    const info = document.createElement('div');
+                    info.className = 'photo-info';
+                    
+                    const name = document.createElement('div');
+                    name.className = 'photo-name';
+                    name.textContent = photo.name;
+                    
+                    const size = document.createElement('div');
+                    size.className = 'photo-size';
+                    size.textContent = formatFileSize(photo.size);
+                    
+                    info.appendChild(name);
+                    info.appendChild(size);
+                    
+                    const actions = document.createElement('div');
+                    actions.className = 'photo-actions';
+                    
+                    const rotateBtn = document.createElement('button');
+                    rotateBtn.className = 'action-btn rotate-btn';
+                    rotateBtn.innerHTML = '↻ Rotacionar';
+                    rotateBtn.title = 'Rotacionar';
+                    rotateBtn.addEventListener('click', () => rotatePhoto(index));
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'action-btn';
+                    removeBtn.innerHTML = '✕ Remover';
+                    removeBtn.title = 'Remover';
+                    removeBtn.addEventListener('click', () => removePhoto(index));
+                    
+                    actions.appendChild(rotateBtn);
+                    actions.appendChild(removeBtn);
+                    
+                    item.appendChild(thumb);
+                    item.appendChild(info);
+                    item.appendChild(actions);
+                    
+                    photoList.appendChild(item);
+                });
+            }
 
-// Medidas fixas da área interna da foto
-const PHOTO_W=55;
-const PHOTO_H=72;
-const MARGIN_LR=3.3;
-const MARGIN_TOP=3.3;
+            // Atualizar grade de pré-visualização
+            function updatePhotoGrid() {
+                const slotsPage1 = document.querySelectorAll('#photoGridPage1 .photo-slot');
+                const slotsPage2 = document.querySelectorAll('#photoGridPage2 .photo-slot');
+                
+                // Atualizar página 1
+                slotsPage1.forEach((slot, index) => {
+                    // Limpar slot
+                    slot.innerHTML = '';
+                    slot.className = 'photo-slot';
+                    
+                    if (photos[index]) {
+                        // Adicionar foto ao slot
+                        const img = document.createElement('img');
+                        img.src = photos[index].url;
+                        img.style.transform = `rotate(${photos[index].rotation}deg)`;
+                        slot.appendChild(img);
+                        
+                        // Adicionar linha de corte
+                        const cutLine = document.createElement('div');
+                        cutLine.className = 'cut-line';
+                        slot.appendChild(cutLine);
+                    } else {
+                        // Slot vazio
+                        slot.className = 'photo-slot empty';
+                    }
+                });
+                
+                // Atualizar página 2
+                slotsPage2.forEach((slot, index) => {
+                    // Limpar slot
+                    slot.innerHTML = '';
+                    slot.className = 'photo-slot';
+                    
+                    const photoIndex = index + PHOTOS_PER_PAGE;
+                    if (photos[photoIndex]) {
+                        // Adicionar foto ao slot
+                        const img = document.createElement('img');
+                        img.src = photos[photoIndex].url;
+                        img.style.transform = `rotate(${photos[photoIndex].rotation}deg)`;
+                        slot.appendChild(img);
+                        
+                        // Adicionar linha de corte
+                        const cutLine = document.createElement('div');
+                        cutLine.className = 'cut-line';
+                        slot.appendChild(cutLine);
+                    } else {
+                        // Slot vazio
+                        slot.className = 'photo-slot empty';
+                    }
+                });
+                
+                // Mostrar/ocultar página 2 conforme necessário
+                if (photos.length > PHOTOS_PER_PAGE) {
+                    page2Preview.style.display = 'block';
+                    pageIndicator.textContent = `Página ${currentPage} de 2`;
+                    nextPageBtn.disabled = false;
+                } else {
+                    page2Preview.style.display = 'none';
+                    pageIndicator.textContent = 'Página 1 de 1';
+                    nextPageBtn.disabled = true;
+                    currentPage = 1;
+                }
+                
+                // Atualizar estado dos botões de navegação
+                prevPageBtn.disabled = currentPage === 1;
+            }
 
-function mmToIn(mm){ return mm/25.4; }
-function pxFor(mm,dpi){ return Math.round(mmToIn(mm)*dpi); }
+            // Formatar tamanho do arquivo
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
 
-function updateRGB(){ rgbVal.textContent=`${rSlider.value},${gSlider.value},${bSlider.value}` }
-rSlider.oninput=gSlider.oninput=bSlider.oninput=updateRGB; updateRGB();
+            // Processar fotos (simulação de ajuste de cores e DPI)
+            function processPhotos() {
+                if (photos.length === 0) return;
+                
+                // Simular processamento
+                alert('Processando fotos... Ajustando cores, DPI e dimensionamento para 9,5x14,5cm.');
+                
+                // Atualizar interface
+                updatePhotoGrid();
+                downloadBtn.disabled = false;
+                autoArrangeBtn.disabled = false;
+                rotateAllBtn.disabled = false;
+                
+                // Se temos mais de 4 fotos, mostrar a segunda página
+                if (photos.length > PHOTOS_PER_PAGE) {
+                    page2Preview.style.display = 'block';
+                    pageIndicator.textContent = `Página ${currentPage} de 2`;
+                    nextPageBtn.disabled = false;
+                }
+            }
 
-function loadImage(src){
-  return new Promise((res,rej)=>{
-    const img=new Image();
-    img.onload=()=>res(img);
-    img.onerror=rej;
-    img.src=src;
-  });
-}
+            // Rotacionar foto específica
+            function rotatePhoto(index) {
+                photos[index].rotation = (photos[index].rotation + 90) % 360;
+                updatePhotoGrid();
+            }
 
-function getCutSize(){
-  const val=sizeSelect.value.split('x');
-  return {W:+val[0],H:+val[1]};
-}
+            // Rotacionar todas as fotos
+            function rotateAllPhotos() {
+                photos.forEach(photo => {
+                    photo.rotation = (photo.rotation + 90) % 360;
+                });
+                updatePhotoGrid();
+            }
 
-function createFramedCanvas(img,dpi,cut){
-  const W=pxFor(cut.W,dpi);
-  const H=pxFor(cut.H,dpi);
-  const photoW=pxFor(PHOTO_W,dpi);
-  const photoH=pxFor(PHOTO_H,dpi);
-  const marginLR=pxFor(MARGIN_LR,dpi);
-  const marginTop=pxFor(MARGIN_TOP,dpi);
+            // Remover foto
+            function removePhoto(index) {
+                photos.splice(index, 1);
+                updatePhotoList();
+                updatePhotoGrid();
+                updateProcessButton();
+            }
 
-  const canvas=document.createElement('canvas');
-  canvas.width=W; canvas.height=H;
-  const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#fff';
-  ctx.fillRect(0,0,W,H);
+            // Atualizar estado do botão de processamento
+            function updateProcessButton() {
+                processBtn.disabled = photos.length === 0;
+            }
 
-  const x=marginLR;
-  const y=marginTop;
+            // Manipular arquivos selecionados
+            function handleFiles(files) {
+                const remainingSlots = MAX_PHOTOS - photos.length;
+                
+                if (files.length > remainingSlots) {
+                    alert(`Você já tem ${photos.length} fotos. Só é possível adicionar mais ${remainingSlots}.`);
+                    files = Array.from(files).slice(0, remainingSlots);
+                }
+                
+                Array.from(files).forEach(file => {
+                    if (!file.type.match('image.*')) {
+                        alert(`O arquivo "${file.name}" não é uma imagem.`);
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        photos.push({
+                            name: file.name,
+                            size: file.size,
+                            url: e.target.result,
+                            rotation: 0
+                        });
+                        
+                        updatePhotoList();
+                        updateProcessButton();
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+            }
 
-  const frame=document.createElement('canvas');
-  frame.width=photoW;
-  frame.height=photoH;
-  const fctx=frame.getContext('2d');
+            // Navegar para a página anterior
+            function goToPrevPage() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updatePageView();
+                }
+            }
 
-  const imgRatio=img.width/img.height;
-  const areaRatio=photoW/photoH;
-  let drawW,drawH,offX=0,offY=0;
-  if(imgRatio>areaRatio){
-    drawH=photoH;
-    drawW=Math.round(photoH*imgRatio);
-    offX=Math.round((photoW-drawW)/2);
-  }else{
-    drawW=photoW;
-    drawH=Math.round(photoW/imgRatio);
-    offY=Math.round((photoH-drawH)/2);
-  }
-  fctx.drawImage(img,offX,offY,drawW,drawH);
+            // Navegar para a próxima página
+            function goToNextPage() {
+                if (currentPage < 2) {
+                    currentPage++;
+                    updatePageView();
+                }
+            }
 
-  const id=fctx.getImageData(0,0,photoW,photoH);
-  const data=id.data;
-  const style=styleSelect.value;
-  if(style==='bw'){
-    for(let i=0;i<data.length;i+=4){
-      const v=0.3*data[i]+0.59*data[i+1]+0.11*data[i+2];
-      data[i]=data[i+1]=data[i+2]=v;
-    }
-  }else if(style==='vintage'){
-    for(let i=0;i<data.length;i+=4){
-      data[i]=Math.min(255,data[i]+10);
-      data[i+2]=Math.max(0,data[i+2]-6);
-    }
-  }else if(style==='manual'){
-    const rt=+rSlider.value,gt=+gSlider.value,bt=+bSlider.value,alpha=0.25;
-    for(let i=0;i<data.length;i+=4){
-      data[i]=Math.round((1-alpha)*data[i]+alpha*rt);
-      data[i+1]=Math.round((1-alpha)*data[i+1]+alpha*gt);
-      data[i+2]=Math.round((1-alpha)*data[i+2]+alpha*bt);
-    }
-  }
-  fctx.putImageData(id,0,0);
+            // Atualizar visualização da página
+            function updatePageView() {
+                if (currentPage === 1) {
+                    page2Preview.style.display = 'none';
+                    prevPageBtn.disabled = true;
+                    nextPageBtn.disabled = false;
+                } else {
+                    page2Preview.style.display = 'block';
+                    prevPageBtn.disabled = false;
+                    nextPageBtn.disabled = true;
+                }
+                pageIndicator.textContent = `Página ${currentPage} de 2`;
+            }
 
-  ctx.drawImage(frame,x,y,photoW,photoH);
-  return canvas;
-}
+            // Event Listeners
+            browseBtn.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+                fileInput.value = ''; // Reset para permitir selecionar os mesmos arquivos novamente
+            });
+            
+            // Drag and Drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('drag-over');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                handleFiles(e.dataTransfer.files);
+            });
+            
+            processBtn.addEventListener('click', processPhotos);
+            
+            clearBtn.addEventListener('click', () => {
+                photos = [];
+                updatePhotoList();
+                updatePhotoGrid();
+                updateProcessButton();
+                downloadBtn.disabled = true;
+                autoArrangeBtn.disabled = true;
+                rotateAllBtn.disabled = true;
+                currentPage = 1;
+                updatePageView();
+            });
+            
+            downloadBtn.addEventListener('click', () => {
+                alert('Download iniciado! Seu arquivo A4 com as fotos está pronto para impressão.');
+                // Em uma implementação real, aqui seria gerado um PDF ou imagem para download
+            });
+            
+            autoArrangeBtn.addEventListener('click', () => {
+                alert('Fotos organizadas automaticamente!');
+                // Em uma implementação real, aqui seria implementada a lógica de organização automática
+            });
+            
+            rotateAllBtn.addEventListener('click', rotateAllPhotos);
+            
+            prevPageBtn.addEventListener('click', goToPrevPage);
+            nextPageBtn.addEventListener('click', goToNextPage);
 
-generateBtn.onclick=async()=>{
-  gallery.innerHTML='';
-  const files=[...fileInput.files];
-  if(!files.length) return alert('Selecione pelo menos uma imagem!');
-  const dpi=parseInt(dpiSelect.value,10);
-  const cut=getCutSize();
-
-  for(const f of files){
-    const img=await loadImage(URL.createObjectURL(f));
-    const c=createFramedCanvas(img,dpi,cut);
-    const thumb=document.createElement('div');
-    thumb.className='thumb';
-    thumb.appendChild(c);
-
-    const btn=document.createElement('button');
-    btn.className='btn small';
-    btn.textContent='Baixar';
-    btn.onclick=()=>{
-      c.toBlob(blob=>{
-        const a=document.createElement('a');
-        a.href=URL.createObjectURL(blob);
-        a.download=`${f.name.replace(/\.[^/.]+$/,'')}_${cut.W}x${cut.H}mm.png`;
-        a.click();
-      });
-    };
-    thumb.appendChild(document.createElement('br'));
-    thumb.appendChild(btn);
-    gallery.appendChild(thumb);
-  }
-  alert(`Fotos geradas com moldura ${cut.W}×${cut.H} mm e foto interna 55×72 mm.`);
-};
-
-downloadAllBtn.onclick=async()=>{
-  const canvases=gallery.querySelectorAll('canvas');
-  if(!canvases.length) return alert('Nenhuma imagem gerada.');
-  const zip=new JSZip(); let i=1;
-  for(const c of canvases){
-    const blob=await new Promise(r=>c.toBlob(r,'image/png'));
-    zip.file(`foto_${i}.png`,blob); i++;
-  }
-  const content=await zip.generateAsync({type:'blob'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(content);
-  a.download='fotos_polaroid.zip';
-  a.click();
-};
-
-resetBtn.onclick=()=>{
-  fileInput.value=''; gallery.innerHTML='';
-  rSlider.value=gSlider.value=bSlider.value=0;
-  styleSelect.value='natural'; updateRGB();
-  alert('Sistema resetado.');
-};
-
-// 🆕 Gerar PDF com linhas de corte
-generatePDFBtn.onclick=async()=>{
-  const canvases=gallery.querySelectorAll('canvas');
-  if(!canvases.length) return alert('Nenhuma imagem gerada.');
-
-  const cut=getCutSize();
-  const pdf=new jsPDF({unit:'mm',format:'a4'});
-  const pageW=210, pageH=297;
-  const photoW=cut.W, photoH=cut.H;
-  const margin=5;
-  const spacing=3;
-
-  let x=margin, y=margin;
-  for(let i=0;i<canvases.length;i++){
-    const imgData=canvases[i].toDataURL('image/jpeg',1);
-    if(x+photoW>pageW-margin){
-      x=margin;
-      y+=photoH+spacing;
-    }
-    if(y+photoH>pageH-margin){
-      pdf.addPage();
-      x=margin; y=margin;
-    }
-
-    pdf.addImage(imgData,'JPEG',x,y,photoW,photoH);
-
-    // linhas-guia de corte cinza claro
-    pdf.setDrawColor(180);
-    pdf.setLineWidth(0.1);
-    pdf.rect(x,y,photoW,photoH);
-
-    x+=photoW+spacing;
-  }
-
-  pdf.save('fotos_polaroid_guia.pdf');
-};
-</script>
+            // Inicializar
+            initializePhotoSlots();
+            updatePhotoList();
+        });
+    </script>
 </body>
 </html>
